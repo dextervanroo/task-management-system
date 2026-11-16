@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.utils import timezone
 
 from apps.tasks.models import Task
+from apps.tasks.selectors import not_overdue_tasks, overdue_tasks
 
 
 class OverdueFilter(admin.SimpleListFilter):
@@ -12,12 +12,10 @@ class OverdueFilter(admin.SimpleListFilter):
         return (("yes", "Yes"), ("no", "No"))
 
     def queryset(self, request, queryset):
-        today = timezone.localdate()
-        overdue = queryset.filter(due_date__lt=today).exclude(status=Task.Status.COMPLETED)
         if self.value() == "yes":
-            return overdue
+            return overdue_tasks(queryset)
         if self.value() == "no":
-            return queryset.exclude(pk__in=overdue.values("pk"))
+            return not_overdue_tasks(queryset)
         return queryset
 
 
