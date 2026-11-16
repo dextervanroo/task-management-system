@@ -1,11 +1,21 @@
-import { Container, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { Route, Routes } from "react-router";
+
+import { RequireAuth } from "@/auth/RequireAuth";
+import { AppLayout } from "@/components/AppLayout";
+import LoginPage from "@/pages/LoginPage";
+import NotFoundPage from "@/pages/NotFoundPage";
 
 export default function App() {
   return (
-    <Container component="main" maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1">
-        Task Manager
-      </Typography>
-    </Container>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<Typography component="h1">Tasks</Typography>} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
