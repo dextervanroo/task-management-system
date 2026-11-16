@@ -104,9 +104,6 @@ export default function LoginPage() {
             Sign in
           </Button>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: "center" }}>
-          Demo accounts: alice / demo1234, bob / demo1234, admin / admin123
-        </Typography>
       </Paper>
     </Container>
   );

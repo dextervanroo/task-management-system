@@ -70,6 +70,12 @@ describe("LoginPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not log in.");
   });
 
+  it("does not reveal any account credentials", () => {
+    renderLogin();
+
+    expect(screen.queryByText(/demo1234|admin123/)).not.toBeInTheDocument();
+  });
+
   it("redirects users who are already logged in", () => {
     renderLogin(makeAuth());
 
