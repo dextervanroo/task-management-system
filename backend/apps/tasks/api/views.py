@@ -1,5 +1,7 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from apps.core.api.mixins import EagerLoadingViewMixin
 from apps.tasks import services
@@ -27,3 +29,9 @@ class TaskViewSet(EagerLoadingViewMixin, viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         services.delete_task(instance)
+
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        """Mark the task as completed and record when it happened."""
+        task = services.complete_task(self.get_object())
+        return Response(self.get_serializer(task).data)

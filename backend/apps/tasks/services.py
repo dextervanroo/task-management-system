@@ -33,3 +33,10 @@ def update_task(task: Task, **fields) -> Task:
 
 def delete_task(task: Task) -> None:
     task.delete()
+
+
+def complete_task(task: Task) -> Task:
+    """Mark the task as completed. Completing an already completed task is a no-op."""
+    if task.status == Task.Status.COMPLETED:
+        return task
+    return update_task(task, status=Task.Status.COMPLETED)
