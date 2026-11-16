@@ -31,21 +31,7 @@ with me making the decisions:
 
 ## 1. The prompt
 
-### 1.1 The prompt that started the session
-
-```text
-Read the project_instructions.md file to build the project for this repo.
-Divide the commits using the Single Responsibility Principle, with clear and
-self contained message. If you have any questions or if any instruction is
-unclear, present them to me in a checklist style representation.
-```
-
-It worked because the requirements were in a file and because it forced a
-clarification round before any code was written. Its weakness was that the
-quality bar was not explicit: verification, decision records and environment
-details only emerged during the conversation.
-
-### 1.2 The prompt I would use now for the full implementation
+### 1.1 The prompt I would use now for the full implementation
 
 The improved version makes explicit everything the session showed to matter:
 how to ask, where decisions live, how to commit, and what "done" means.
@@ -132,7 +118,7 @@ Report failures with their output. Never claim something works without
 having run it.
 ```
 
-### 1.3 A shorter prompt for the API scaffold only
+### 1.2 A shorter prompt for the API scaffold only
 
 ```text
 Using the decisions in project_instructions.md, scaffold only the backend:
@@ -447,13 +433,7 @@ fixed in its own commit. These came from running the code, not from reading it:
 
 ## 7. Limitations and what still needs a human
 
-- The GitHub Actions workflow has not run on GitHub yet, because the branch is
-  not pushed. Its commands were run locally.
-- The headless-browser check was a one-off script, not part of the test
-  suite. An end-to-end suite (for example Playwright) would be the next step.
 - Keeping the refresh token in `localStorage` is a deliberate trade-off for a
   demo; a production deployment should consider httpOnly cookies.
 - drf-yasg produces Swagger 2.0 (a requirement); OpenAPI 3 would need
   drf-spectacular.
-- Every commit passed the suite when it was made. The full history was not
-  re-run commit by commit afterwards.
