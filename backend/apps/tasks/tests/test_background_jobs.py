@@ -15,7 +15,8 @@ pytestmark = pytest.mark.django_db
 
 def test_celery_app_uses_django_settings():
     assert app.main == "task_management"
-    assert app.conf.broker_url == settings.CELERY_BROKER_URL
+    assert app.conf.beat_schedule == settings.CELERY_BEAT_SCHEDULE
+    assert app.conf.task_acks_late is True
 
 
 def test_overdue_reminder_runs_daily():

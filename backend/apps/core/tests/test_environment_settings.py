@@ -36,6 +36,9 @@ def test_silk_is_enabled_only_in_development(monkeypatch):
 
 
 def test_production_is_secure_by_default(monkeypatch):
+    # A developer's .env may relax these for local runs; check the real defaults.
+    monkeypatch.delenv("DJANGO_SECURE_SSL_REDIRECT", raising=False)
+    monkeypatch.delenv("DJANGO_SECURE_HSTS_SECONDS", raising=False)
     monkeypatch.setenv("DJANGO_SECRET_KEY", "a-production-secret")
     monkeypatch.setenv("DJANGO_ALLOWED_HOSTS", "api.example.com")
     monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com")
