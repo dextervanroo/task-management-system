@@ -1,12 +1,17 @@
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.views import (
     TokenBlacklistView,
     TokenObtainPairView,
     TokenRefreshView,
 )
 
+from apps.core.api.throttling import LoginRateThrottle
+
 
 class LoginView(TokenObtainPairView):
     """Exchange a username and password for an access/refresh token pair."""
+
+    throttle_classes = [AnonRateThrottle, LoginRateThrottle]
 
 
 class RefreshView(TokenRefreshView):

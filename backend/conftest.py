@@ -48,3 +48,13 @@ def make_authenticated_client(user) -> APIClient:
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {AccessToken.for_user(user)}")
     return client
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    """Throttling state lives in the cache; isolate it between tests."""
+    from django.core.cache import cache
+
+    cache.clear()
+    yield
+    cache.clear()
