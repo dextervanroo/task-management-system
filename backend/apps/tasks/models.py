@@ -28,6 +28,8 @@ class Task(UUIDModel, TimeStampedModel):
         null=True,
         blank=True,
         related_name="assigned_tasks",
+        # Covered by the (assignee, status) index, whose first column is assignee.
+        db_index=False,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -81,3 +81,9 @@ def test_declared_indexes():
     index_fields = {tuple(index.fields) for index in Task._meta.indexes}
 
     assert {("status",), ("due_date",), ("assignee", "status")} <= index_fields
+
+
+def test_assignee_has_no_separate_fk_index():
+    # (assignee, status) starts with assignee, so it already serves assignee lookups.
+    assert Task._meta.get_field("assignee").db_index is False
+    assert Task._meta.get_field("created_by").db_index is True

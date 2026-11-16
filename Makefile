@@ -6,7 +6,7 @@ FRONTEND = docker compose exec frontend
 
 .DEFAULT_GOAL := help
 .PHONY: help setup use-development use-production up down rebuild ps logs backend-logs \
-	frontend-logs celery-logs migrate makemigrations seed createsuperuser shell backend-lint \
+	frontend-logs celery-logs migrate makemigrations seed createsuperuser shell benchmark-indexes backend-lint \
 	backend-format backend-test backend-test-cov frontend-install frontend-lint frontend-test \
 	frontend-test-cov lint test clean
 
@@ -75,6 +75,9 @@ createsuperuser: ## Create an admin account interactively
 
 shell: ## Open a Django shell
 	$(BACKEND) python manage.py shell
+
+benchmark-indexes: ## Compare query plans with and without the task indexes (rolled back)
+	docker compose exec -T db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -q' < backend/scripts/benchmark_indexes.sql
 
 # --- Backend code quality and tests -----------------------------------------
 
