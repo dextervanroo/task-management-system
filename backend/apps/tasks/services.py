@@ -14,20 +14,33 @@ def _sync_completion(task: Task) -> None:
         task.completed_at = None
 
 
+def _notify_assignee(task: Task) -> None:
+    """Email the assignee in the background once the transaction commits."""
+    from apps.tasks.tasks import send_task_assigned_email
+
+    task_id = str(task.pk)
+    transaction.on_commit(lambda: send_task_assigned_email.delay(task_id))
+
+
 @transaction.atomic
 def create_task(*, created_by, **fields) -> Task:
     task = Task(created_by=created_by, **fields)
     _sync_completion(task)
     task.save()
+    if task.assignee_id:
+        _notify_assignee(task)
     return task
 
 
 @transaction.atomic
 def update_task(task: Task, **fields) -> Task:
+    previous_assignee_id = task.assignee_id
     for name, value in fields.items():
         setattr(task, name, value)
     _sync_completion(task)
     task.save()
+    if task.assignee_id and task.assignee_id != previous_assignee_id:
+        _notify_assignee(task)
     return task
 
 

@@ -4,6 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_DIR = BASE_DIR.parent
@@ -166,5 +167,28 @@ SWAGGER_SETTINGS = {
             "in": "header",
             "description": "JWT access token, as `Bearer <token>`.",
         }
+    },
+}
+
+# --- Email -------------------------------------------------------------------
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Task Manager <noreply@example.com>")
+
+# --- Celery ------------------------------------------------------------------
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=REDIS_URL)
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "send-overdue-task-reminders": {
+        "task": "apps.tasks.tasks.send_overdue_task_reminders",
+        "schedule": crontab(hour=8, minute=0),
     },
 }
