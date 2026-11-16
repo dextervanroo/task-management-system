@@ -1,8 +1,16 @@
 import { screen } from "@testing-library/react";
 
+import * as tasksApi from "@/api/tasks";
+import * as usersApi from "@/api/users";
+import { page } from "@/test/fixtures";
 import { makeAuth, renderWithProviders } from "@/test/render";
 
 import App from "./App";
+
+beforeEach(() => {
+  vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([]));
+  vi.spyOn(usersApi, "listUsers").mockResolvedValue([]);
+});
 
 describe("App routes", () => {
   it("shows the login page to anonymous users", () => {
@@ -11,10 +19,11 @@ describe("App routes", () => {
     expect(screen.getByRole("heading", { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it("shows the tasks page to authenticated users", () => {
+  it("shows the tasks page to authenticated users", async () => {
     renderWithProviders(<App />);
 
     expect(screen.getByRole("heading", { name: "Tasks" })).toBeInTheDocument();
+    expect(await screen.findByText("No tasks yet.")).toBeInTheDocument();
   });
 
   it("shows a not-found page for unknown URLs", () => {

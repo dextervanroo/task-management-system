@@ -1,0 +1,99 @@
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Route, Routes, useLocation } from "react-router";
+
+import * as tasksApi from "@/api/tasks";
+import * as usersApi from "@/api/users";
+import { bob, makeTask, page } from "@/test/fixtures";
+import { renderWithProviders } from "@/test/render";
+
+import TasksPage from "./TasksPage";
+
+function LocationProbe() {
+  return <p data-testid="location">{useLocation().search}</p>;
+}
+
+function renderPage(route = "/") {
+  return renderWithProviders(
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <>
+            <TasksPage />
+            <LocationProbe />
+          </>
+        }
+      />
+    </Routes>,
+    { route },
+  );
+}
+
+beforeEach(() => {
+  vi.spyOn(usersApi, "listUsers").mockResolvedValue([bob]);
+});
+
+describe("TasksPage", () => {
+  it("lists tasks with the total count", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(
+      page([makeTask({ title: "Write docs" }), makeTask({ title: "Ship it" })]),
+    );
+
+    renderPage();
+
+    expect(screen.getByLabelText("Loading tasks")).toBeInTheDocument();
+    expect(await screen.findByRole("article", { name: "Write docs" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Ship it" })).toBeInTheDocument();
+    expect(screen.getByText("2 tasks")).toBeInTheDocument();
+  });
+
+  it("reads the filters from the URL", async () => {
+    const list = vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([makeTask()]));
+
+    renderPage("/?status=completed&page=2&overdue=false");
+
+    await screen.findByText("1 task");
+    expect(list).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "completed", page: 2, overdue: "false" }),
+      expect.any(AbortSignal),
+    );
+  });
+
+  it("writes filter changes to the URL", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([]));
+    renderPage();
+    await screen.findByText("No tasks yet.");
+
+    await userEvent.click(screen.getByRole("combobox", { name: /status/i }));
+    await userEvent.click(screen.getByRole("option", { name: "Pending" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent("?status=pending");
+    expect(await screen.findByText("No tasks match these filters.")).toBeInTheDocument();
+  });
+
+  it("paginates", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(
+      page([makeTask()], { count: 25, totalPages: 3 }),
+    );
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Go to page 2" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent("?page=2");
+  });
+
+  it("shows errors with a retry button", async () => {
+    const list = vi
+      .spyOn(tasksApi, "listTasks")
+      .mockRejectedValueOnce(new Error("Could not reach the server."))
+      .mockResolvedValueOnce(page([makeTask({ title: "Back online" })]));
+    renderPage();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not reach the server.");
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    expect(await screen.findByRole("article", { name: "Back online" })).toBeInTheDocument();
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+  });
+});
