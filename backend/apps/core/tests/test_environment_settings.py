@@ -49,6 +49,10 @@ def test_production_is_secure_by_default(monkeypatch):
     assert production.SESSION_COOKIE_SECURE is True
     assert production.CSRF_COOKIE_SECURE is True
     assert production.SECURE_HSTS_SECONDS > 0
+    assert production.MIDDLEWARE[:2] == [
+        "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+    ]
 
 
 @pytest.mark.parametrize(
