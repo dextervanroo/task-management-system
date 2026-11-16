@@ -1,6 +1,6 @@
 # Generative AI Usage
 
-This project was built with an AI coding assistant (Claude Code) working in the
+This project was built with an AI coding assistant working in the
 repository under my direction. This document covers:
 
 1. [The prompt](#1-the-prompt) used to generate the full implementation, and a shorter one for an API scaffold only.
