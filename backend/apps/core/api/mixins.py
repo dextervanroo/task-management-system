@@ -24,10 +24,16 @@ class EagerLoadingSerializerMixin:
 
 
 class EagerLoadingViewMixin:
-    """Applies the eager loading declared by the view's serializer to ``get_queryset``."""
+    """Applies the eager loading declared by the view's serializer.
+
+    ``get_queryset`` applies it to ``super().get_queryset()``. Views that build
+    their queryset themselves call :meth:`apply_eager_loading` directly.
+    """
 
     def get_queryset(self) -> QuerySet:
-        queryset = super().get_queryset()
+        return self.apply_eager_loading(super().get_queryset())
+
+    def apply_eager_loading(self, queryset: QuerySet) -> QuerySet:
         setup_eager_loading = getattr(self.get_serializer_class(), "setup_eager_loading", None)
         if setup_eager_loading is None:
             return queryset

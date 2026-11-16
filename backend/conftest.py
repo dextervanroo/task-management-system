@@ -15,17 +15,17 @@ def api_client() -> APIClient:
 
 @pytest.fixture
 def user(db):
-    return UserFactory(username="alice")
+    return UserFactory(username="alice", first_name="Alice", last_name="Anderson")
 
 
 @pytest.fixture
 def other_user(db):
-    return UserFactory(username="bob")
+    return UserFactory(username="bob", first_name="Bob", last_name="Brown")
 
 
 @pytest.fixture
 def staff_user(db):
-    return StaffUserFactory(username="admin")
+    return StaffUserFactory(username="admin", first_name="Ada", last_name="Admin")
 
 
 @pytest.fixture
