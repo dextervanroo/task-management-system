@@ -17,8 +17,22 @@ def test_development_enables_debug(monkeypatch):
     development = load("config.settings.development")
 
     assert development.DEBUG is True
-    assert "http://localhost:5173" in development.CORS_ALLOWED_ORIGINS
     assert "localhost" in development.ALLOWED_HOSTS
+    assert "http://localhost:5173" in development.CORS_ALLOWED_ORIGINS
+
+
+def test_silk_is_enabled_only_in_development(monkeypatch):
+    monkeypatch.setenv("DJANGO_SECRET_KEY", "a-production-secret")
+    monkeypatch.setenv("DJANGO_ALLOWED_HOSTS", "api.example.com")
+    monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com")
+
+    development = load("config.settings.development")
+    production = load("config.settings.production")
+
+    assert "silk" in development.INSTALLED_APPS
+    assert "silk.middleware.SilkyMiddleware" in development.MIDDLEWARE
+    assert "silk" not in production.INSTALLED_APPS
+    assert "silk.middleware.SilkyMiddleware" not in production.MIDDLEWARE
 
 
 def test_production_is_secure_by_default(monkeypatch):

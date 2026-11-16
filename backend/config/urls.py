@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
@@ -13,3 +14,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(api_urlpatterns)),
 ]
+
+if "silk" in settings.INSTALLED_APPS:  # development only
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
