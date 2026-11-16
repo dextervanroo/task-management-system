@@ -1,5 +1,4 @@
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
@@ -13,12 +12,17 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 
+import { completeTask, deleteTask } from "@/api/tasks";
 import type { Task } from "@/api/types";
+import { useAuth } from "@/auth/useAuth";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { TaskActions } from "@/features/tasks/components/TaskActions";
 import { TaskCard } from "@/features/tasks/components/TaskCard";
 import { TaskFiltersBar } from "@/features/tasks/components/TaskFiltersBar";
 import { TaskFormDialog } from "@/features/tasks/components/TaskFormDialog";
 import { useTasks } from "@/features/tasks/hooks/useTasks";
 import { useUsers } from "@/features/tasks/hooks/useUsers";
+import { canDeleteTask } from "@/features/tasks/permissions";
 import { todayIso } from "@/features/tasks/taskFormat";
 import {
   filtersFromSearchParams,
@@ -44,7 +48,10 @@ export default function TasksPage() {
   );
   const { data, loading, error, reload } = useTasks(filters);
   const users = useUsers();
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>(null);
+  const [toDelete, setToDelete] = useState<Task | null>(null);
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const today = todayIso();
 
@@ -52,6 +59,29 @@ export default function TasksPage() {
     setNotice({ message: form === "new" ? "Task created." : "Task updated.", severity: "success" });
     setForm(null);
     reload();
+  }
+
+  /** Run a change on one task, then reload the list and report the outcome. */
+  async function runTaskAction(task: Task, action: () => Promise<unknown>, success: string) {
+    setBusyTaskId(task.id);
+    try {
+      await action();
+      setNotice({ message: success, severity: "success" });
+      reload();
+    } catch (error) {
+      setNotice({
+        message: error instanceof Error ? error.message : "Something went wrong.",
+        severity: "error",
+      });
+    } finally {
+      setBusyTaskId(null);
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!toDelete) return;
+    await runTaskAction(toDelete, () => deleteTask(toDelete.id), "Task deleted.");
+    setToDelete(null);
   }
 
   return (
@@ -111,14 +141,16 @@ export default function TasksPage() {
               task={task}
               today={today}
               actions={
-                <Button
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => setForm(task)}
-                  aria-label={`Edit ${task.title}`}
-                >
-                  Edit
-                </Button>
+                <TaskActions
+                  task={task}
+                  canDelete={canDeleteTask(user, task)}
+                  busy={busyTaskId === task.id}
+                  onComplete={() =>
+                    void runTaskAction(task, () => completeTask(task.id), "Task completed.")
+                  }
+                  onEdit={() => setForm(task)}
+                  onDelete={() => setToDelete(task)}
+                />
               }
             />
           ))}
@@ -145,6 +177,16 @@ export default function TasksPage() {
           onSaved={handleSaved}
         />
       )}
+
+      <ConfirmDialog
+        open={toDelete !== null}
+        title="Delete task?"
+        message={`"${toDelete?.title ?? ""}" will be permanently deleted.`}
+        confirmLabel="Delete"
+        busy={toDelete !== null && busyTaskId === toDelete.id}
+        onConfirm={() => void handleConfirmDelete()}
+        onCancel={() => setToDelete(null)}
+      />
 
       <Snackbar
         open={notice !== null}

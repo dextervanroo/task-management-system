@@ -143,3 +143,96 @@ describe("TasksPage editing", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
+
+describe("TasksPage actions", () => {
+  it("completes a task", async () => {
+    const task = makeTask({ title: "Ship it" });
+    vi.spyOn(tasksApi, "listTasks")
+      .mockResolvedValueOnce(page([task]))
+      .mockResolvedValueOnce(page([{ ...task, status: "completed" }]));
+    const complete = vi
+      .spyOn(tasksApi, "completeTask")
+      .mockResolvedValue({ ...task, status: "completed" });
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Complete Ship it" }));
+
+    expect(complete).toHaveBeenCalledWith(task.id);
+    expect(await screen.findByText("Task completed.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Complete Ship it" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("reports failed actions", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([makeTask({ title: "Ship it" })]));
+    vi.spyOn(tasksApi, "completeTask").mockRejectedValue(new Error("Not found."));
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Complete Ship it" }));
+
+    expect(await screen.findByText("Not found.")).toBeInTheDocument();
+  });
+
+  it("uses a generic message for unexpected failures", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([makeTask({ title: "Ship it" })]));
+    vi.spyOn(tasksApi, "completeTask").mockRejectedValue("boom");
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Complete Ship it" }));
+
+    expect(await screen.findByText("Something went wrong.")).toBeInTheDocument();
+  });
+
+  it("deletes a task after confirmation", async () => {
+    const task = makeTask({ title: "Old task" });
+    vi.spyOn(tasksApi, "listTasks")
+      .mockResolvedValueOnce(page([task]))
+      .mockResolvedValueOnce(page([]));
+    const remove = vi.spyOn(tasksApi, "deleteTask").mockResolvedValue();
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Delete Old task" }));
+    const dialog = screen.getByRole("dialog", { name: "Delete task?" });
+    expect(dialog).toHaveTextContent('"Old task" will be permanently deleted.');
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(remove).toHaveBeenCalledWith(task.id);
+    expect(await screen.findByText("Task deleted.")).toBeInTheDocument();
+    expect(await screen.findByText("No tasks yet.")).toBeInTheDocument();
+  });
+
+  it("keeps the task when deletion is cancelled", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([makeTask({ title: "Keep me" })]));
+    const remove = vi.spyOn(tasksApi, "deleteTask");
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Delete Keep me" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(remove).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("only offers deletion to the creator", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(
+      page([makeTask({ title: "Bob's task", createdBy: bob })]),
+    );
+    renderPage();
+
+    await screen.findByRole("article", { name: "Bob's task" });
+    expect(screen.queryByRole("button", { name: "Delete Bob's task" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit Bob's task" })).toBeInTheDocument();
+  });
+
+  it("dismisses notices", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([makeTask({ title: "Ship it" })]));
+    vi.spyOn(tasksApi, "completeTask").mockRejectedValue(new Error("Not found."));
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: "Complete Ship it" }));
+
+    await userEvent.click(await screen.findByRole("button", { name: "Close" }));
+
+    await waitFor(() => expect(screen.queryByText("Not found.")).not.toBeInTheDocument());
+  });
+});
