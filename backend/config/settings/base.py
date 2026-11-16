@@ -19,6 +19,9 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-local-development
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
+# Only the listed frontend origins may call the API from a browser.
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -32,6 +35,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_yasg",
+    "corsheaders",
 ]
 LOCAL_APPS = [
     "apps.core",
@@ -43,6 +47,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Must run before CommonMiddleware so preflight responses get CORS headers.
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
