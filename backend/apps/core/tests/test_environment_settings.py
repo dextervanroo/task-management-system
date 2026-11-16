@@ -71,3 +71,13 @@ def test_production_requires_secrets(monkeypatch, missing):
 
     with pytest.raises(ImproperlyConfigured):
         load("config.settings.production")
+
+
+def test_each_settings_module_names_its_environment(monkeypatch, settings):
+    monkeypatch.setenv("DJANGO_SECRET_KEY", "a-production-secret")
+    monkeypatch.setenv("DJANGO_ALLOWED_HOSTS", "api.example.com")
+    monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com")
+
+    assert load("config.settings.development").ENVIRONMENT == "development"
+    assert load("config.settings.production").ENVIRONMENT == "production"
+    assert settings.ENVIRONMENT == "test"

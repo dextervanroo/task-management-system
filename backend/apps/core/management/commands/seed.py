@@ -3,13 +3,17 @@
 Safe to run repeatedly: users are created or reset, sample tasks are only
 created for users that have none. ``--extra-tasks N`` bulk-inserts N random
 tasks, used to measure query plans and index gains on a realistic volume.
+
+The demo accounts have public passwords, so the command refuses to run with
+production settings unless ``--force`` is passed.
 """
 
 import random
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
@@ -83,9 +87,19 @@ class Command(BaseCommand):
             default=0,
             help="Also bulk-insert this many random tasks (for performance tests).",
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Allow seeding with production settings (creates accounts with known passwords).",
+        )
 
     @transaction.atomic
-    def handle(self, *args, extra_tasks=0, **options):
+    def handle(self, *args, extra_tasks=0, force=False, **options):
+        if getattr(settings, "ENVIRONMENT", None) == "production" and not force:
+            raise CommandError(
+                "Refusing to seed demo accounts with known passwords in production. "
+                "Run with --force if you really want them."
+            )
         users = {spec["username"]: self._upsert_user(spec) for spec in DEMO_USERS}
         for username, tasks in SAMPLE_TASKS.items():
             self._create_sample_tasks(users[username], tasks, users)

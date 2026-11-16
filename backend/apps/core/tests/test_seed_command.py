@@ -2,7 +2,7 @@ from io import StringIO
 
 import pytest
 from django.contrib.auth import authenticate, get_user_model
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 
 from apps.tasks.models import Task
 
@@ -66,3 +66,22 @@ def test_seed_can_generate_extra_tasks_for_benchmarks():
 
     assert Task.objects.count() == before + 250
     assert "250 extra tasks" in output
+
+
+def test_seed_refuses_to_run_in_production(settings):
+    settings.ENVIRONMENT = "production"
+
+    with pytest.raises(CommandError, match="--force"):
+        seed()
+
+    assert not User.objects.exists()
+    assert not Task.objects.exists()
+
+
+def test_seed_runs_in_production_when_forced(settings):
+    settings.ENVIRONMENT = "production"
+
+    output = seed("--force")
+
+    assert User.objects.filter(username="admin").exists()
+    assert "Demo data ready." in output

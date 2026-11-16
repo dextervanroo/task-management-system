@@ -57,6 +57,9 @@ Created by `make seed` (safe to run again; it resets these passwords):
 Each account starts with sample tasks in every status, including overdue tasks
 and tasks assigned to the other users.
 
+Because these passwords are public, `seed` refuses to run with production
+settings. Pass `--force` only if you really want demo accounts there.
+
 ## Everyday commands
 
 `make help` lists everything. The most used targets:

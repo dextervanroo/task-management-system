@@ -3,6 +3,7 @@
 from .base import *  # noqa: F401,F403
 from .base import MIDDLEWARE, env
 
+ENVIRONMENT = "production"
 DEBUG = False
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 # Fail fast: production must declare the hosts it serves.
