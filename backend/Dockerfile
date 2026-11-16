@@ -5,11 +5,14 @@
 # ---------------------------------------------------------------------------
 FROM python:3.12-slim AS base
 
+# Packages are installed system-wide. POETRY_VIRTUALENVS_IN_PROJECT=false makes Poetry
+# ignore a host .venv bind-mounted into /app instead of (re)creating it as root.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     POETRY_VERSION=1.8.5 \
     POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
     POETRY_NO_INTERACTION=1
 
 WORKDIR /app
