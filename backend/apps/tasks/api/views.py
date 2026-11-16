@@ -9,6 +9,7 @@ from apps.tasks import services
 from apps.tasks.api.filters import TaskFilter
 from apps.tasks.api.permissions import CanDeleteTask
 from apps.tasks.api.serializers import TaskSerializer
+from apps.tasks.models import Task
 from apps.tasks.selectors import visible_tasks_for
 
 
@@ -24,6 +25,8 @@ class TaskViewSet(EagerLoadingViewMixin, viewsets.ModelViewSet):
     ordering = ["-created_at"]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # schema generation, no real user
+            return Task.objects.none()
         return self.apply_eager_loading(visible_tasks_for(self.request.user))
 
     def perform_create(self, serializer):

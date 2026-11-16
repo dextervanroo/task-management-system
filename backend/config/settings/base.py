@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
+    "drf_yasg",
 ]
 LOCAL_APPS = [
     "apps.core",
@@ -147,4 +148,17 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+SWAGGER_USE_COMPAT_RENDERERS = False
+SWAGGER_SETTINGS = {
+    "USE_SESSION_AUTH": False,
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT access token, as `Bearer <token>`.",
+        }
+    },
 }
