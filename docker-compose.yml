@@ -1,20 +1,14 @@
 # Local stack: PostgreSQL, Redis, Django API, Celery worker, Celery Beat and the
-# React frontend. DJANGO_ENV in .env picks the settings module and the image
-# targets (development | production). Run `make up` or `docker compose up --build`.
-
-x-backend-env: &backend-env
-  POSTGRES_HOST: db
-  POSTGRES_PORT: "5432"
-  REDIS_URL: redis://redis:6379/0
-  CELERY_BROKER_URL: redis://redis:6379/0
+# React frontend. Every service reads the root .env file; DJANGO_ENV picks the
+# settings module and the image targets (development | production).
+# Run `make up` or `docker compose up -d --build`.
 
 x-backend: &backend
   build:
     context: ./backend
+    dockerfile: Dockerfile
     target: ${DJANGO_ENV:-development}
   env_file: .env
-  environment:
-    <<: *backend-env
   volumes:
     - ./backend:/app
   depends_on:
@@ -22,41 +16,34 @@ x-backend: &backend
       condition: service_healthy
     redis:
       condition: service_healthy
-  restart: unless-stopped
 
 services:
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-task_management}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5433:5432"
+    env_file: .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
-      retries: 10
-    restart: unless-stopped
+      retries: 5
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 10
-    restart: unless-stopped
+      retries: 5
 
   backend:
     <<: *backend
     ports:
       - "8000:8000"
+    # Allows attaching to the container to use a debugger (pdb/breakpoint()).
+    stdin_open: true
+    tty: true
     healthcheck:
       test:
         - CMD
@@ -72,24 +59,22 @@ services:
     <<: *backend
     command: celery -A config worker --loglevel=info
     environment:
-      <<: *backend-env
       RUN_MIGRATIONS: "false"
 
   celery-beat:
     <<: *backend
     command: celery -A config beat --loglevel=info --schedule /tmp/celerybeat-schedule
     environment:
-      <<: *backend-env
       RUN_MIGRATIONS: "false"
 
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
       target: ${DJANGO_ENV:-development}
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    env_file: .env
     ports:
       - "5173:5173"
     volumes:
@@ -99,7 +84,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    restart: unless-stopped
 
 volumes:
   postgres_data:

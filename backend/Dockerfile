@@ -20,7 +20,7 @@ COPY pyproject.toml poetry.lock ./
 # Development: includes dev tools (pytest, linters, silk). Code is bind-mounted.
 # ---------------------------------------------------------------------------
 FROM base AS development
-RUN poetry install --no-root --with dev
+RUN poetry install --no-root --no-interaction
 COPY . .
 RUN chmod +x scripts/*.sh
 EXPOSE 8000
@@ -31,7 +31,7 @@ CMD ["scripts/start.sh"]
 # Production: runtime dependencies only, non-root user, gunicorn.
 # ---------------------------------------------------------------------------
 FROM base AS production
-RUN poetry install --no-root --only main
+RUN poetry install --no-root --no-interaction --without dev
 COPY . .
 RUN chmod +x scripts/*.sh \
     && useradd --create-home --uid 1000 app \
