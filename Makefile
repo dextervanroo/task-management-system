@@ -1,7 +1,9 @@
 # Common commands for the whole repository. Run `make help` for the list.
 # Tools run inside the docker-compose containers, so only Docker is required.
 
-BACKEND = docker compose exec backend poetry run
+# Backend commands run with the host user's ids so generated files (migrations,
+# coverage reports) are not owned by root.
+BACKEND = docker compose exec --user $$(id -u):$$(id -g) -e HOME=/tmp backend poetry run
 FRONTEND = docker compose exec frontend
 
 .DEFAULT_GOAL := help

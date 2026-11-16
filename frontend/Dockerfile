@@ -1,15 +1,19 @@
 # syntax=docker/dockerfile:1
 
 FROM node:22-alpine AS base
+# Run as the image's unprivileged "node" user (uid 1000) so files written to the
+# bind-mounted source (coverage reports, build output) belong to the host user.
 WORKDIR /app
-COPY package.json package-lock.json ./
+RUN chown node:node /app
+USER node
+COPY --chown=node:node package.json package-lock.json ./
 RUN npm ci
 
 # ---------------------------------------------------------------------------
 # Development: Vite dev server with hot reload. Code is bind-mounted.
 # ---------------------------------------------------------------------------
 FROM base AS development
-COPY . .
+COPY --chown=node:node . .
 EXPOSE 5173
 CMD ["npm", "run", "dev"]
 
@@ -19,7 +23,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS build
 ARG VITE_API_URL=http://localhost:8000/api
 ENV VITE_API_URL=${VITE_API_URL}
-COPY . .
+COPY --chown=node:node . .
 RUN npm run build
 
 FROM nginx:1.27-alpine AS production
