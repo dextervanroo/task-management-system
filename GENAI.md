@@ -102,7 +102,10 @@ Frontend expectations:
 - TypeScript strict, React + MUI + React Router only. One typed fetch client
   handles tokens, refresh and errors. Pure helpers live apart from components.
 - Responsive down to 375px. Vitest + Testing Library; any console warning or
-  error fails a test.
+  error fails a test. Tests live in `__tests__/` folders next to the code:
+  `*.unit.spec.ts` for helpers, hooks and API modules, and
+  `*.integration.spec.tsx` for components and pages, each suite runnable on
+  its own.
 
 Security tests: anonymous access, access to other users' objects, forged or
 wrong-type tokens, inactive users, throttling, CORS origins, unknown hosts.

@@ -135,7 +135,8 @@ Decisions agreed before implementation. They refine the requirements above.
 
 - **Language:** TypeScript.
 - **Runtime dependencies (lean):** React 19, MUI and React Router only. API calls go through a small typed `fetch` client; state lives in React hooks and a Context for the logged-in user; forms use MUI components with hand-written validation helpers. No data-fetching, form or state-management libraries.
-- **Tooling:** TypeScript 5, ESLint 9, Vitest with Testing Library (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`), `jsdom` and `@vitest/coverage-v8`. `package.json` scripts: `dev`, `build`, `lint`, `test`, `test:coverage`.
+- **Tooling:** TypeScript 5, ESLint 9, Vitest with Testing Library (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`), `jsdom` and `@vitest/coverage-v8`. `package.json` scripts: `dev`, `build`, `lint`, `test`, `test:coverage`, `test:unit`, `test:integration`.
+- **Test organization:** tests live in a `__tests__/` folder next to the code they cover. Pure helpers, hooks and API modules have `*.unit.spec.ts` files; components and pages, rendered with their providers, have `*.integration.spec.tsx` files. `vitest.config.unit.ts` and `vitest.config.integration.ts` run each suite on their own, on top of a shared base (`vitest.shared.ts`); `npm test` and `npm run test:coverage` run both. API calls are mocked at the module level with `vi.spyOn`.
 - **Test coverage:** the 80% coverage target also applies to the frontend, enforced through Vitest's coverage thresholds.
 - **Docker:** the frontend runs in `docker-compose` with the Vite dev server in development and as an nginx-served static build in production, so a single `make up` starts the whole stack.
 - **Configuration:** `VITE_API_URL` is defined in the repository's root `.env` (there is no separate frontend `.env`).

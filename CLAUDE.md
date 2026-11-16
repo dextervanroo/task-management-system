@@ -28,6 +28,7 @@ Run tools through `make` (they execute inside the containers):
 make setup             # first run: .env, build, start, seed
 make test              # backend + frontend tests
 make lint              # flake8, isort, black, ESLint, tsc
+make frontend-test-unit / make frontend-test-integration   # one frontend suite
 make backend-format    # isort + black
 make backend-test ARGS="apps/tasks -x"
 make makemigrations && make migrate
@@ -56,6 +57,7 @@ frontend/src/
                    taskValidation, permissions)
   pages/        route screens
   test/         setup.ts, render.tsx (renderWithProviders), fixtures.ts
+  **/__tests__/ the tests for the folder they sit in (*.unit.spec.ts, *.integration.spec.tsx)
 ```
 
 ## Backend conventions
@@ -109,10 +111,17 @@ frontend/src/
   `backend/conftest.py` (`api_client`, `auth_client`, `other_client`,
   `staff_client`, `user`, `other_user`, `staff_user`); factories are in
   `apps/*/tests/factories.py`. Tests must not depend on the developer's `.env`.
-- Frontend: Vitest + Testing Library + user-event. Render with
-  `renderWithProviders` from `src/test/render.tsx`, build data with
-  `src/test/fixtures.ts`, and mock API modules with `vi.spyOn`. Query elements
-  by role and accessible name.
+- Frontend: Vitest + Testing Library + user-event. Put tests in a `__tests__/`
+  folder next to the code, with relative imports going one level up
+  (`../TaskCard`):
+  - `<name>.unit.spec.ts` for pure helpers, hooks (`renderHook`) and API
+    modules, with no component rendering.
+  - `<name>.integration.spec.tsx` for components and pages. Render them with
+    `renderWithProviders` from `src/test/render.tsx` (theme, router, auth).
+
+  Build data with `src/test/fixtures.ts`, mock API modules with `vi.spyOn`, and
+  query elements by role and accessible name. A file that does not match either
+  pattern is not picked up by Vitest.
 
 ## Git conventions
 

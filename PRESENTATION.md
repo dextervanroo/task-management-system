@@ -147,6 +147,13 @@ Components never call `fetch` directly. Logic that can be a pure function
 (formatting, filters, validation, permissions) lives outside components and is
 tested on its own.
 
+Tests sit in a `__tests__/` folder next to the code and come in two suites:
+**unit** specs (`*.unit.spec.ts`) for helpers, hooks and API modules, and
+**integration** specs (`*.integration.spec.tsx`) for components and pages
+rendered with their providers. Each suite can run alone
+(`make frontend-test-unit`, `make frontend-test-integration`), and the full run
+enforces the coverage gate.
+
 ## 4. Demo script
 
 Before the call: `make setup`. This builds the stack, applies migrations and

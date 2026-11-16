@@ -74,6 +74,7 @@ settings. Pass `--force` only if you really want demo accounts there.
 | `make lint` | flake8, isort, black, ESLint and TypeScript |
 | `make backend-format` | Apply isort and black |
 | `make backend-test ARGS="-k tasks -x"` | Pass options to pytest |
+| `make frontend-test-unit`, `make frontend-test-integration` | Run one frontend suite: helpers, hooks and API modules, or components and pages |
 | `make backend-test-cov`, `make frontend-test-cov` | HTML coverage reports |
 | `make benchmark-indexes` | Re-run the index measurements below |
 | `make clean` | Stop and **delete** the database and dependency volumes |
@@ -177,7 +178,8 @@ curl -s "localhost:8000/api/tasks/?status=pending&overdue=true&ordering=due_date
 │   │   ├── pages/               # Route-level screens
 │   │   └── test/                # Test setup, render helper, fixtures
 │   ├── Dockerfile               # development (Vite) and production (nginx) targets
-│   └── vite.config.ts           # Vite and Vitest configuration
+│   ├── vite.config.ts           # Vite build and the full Vitest run (coverage gate)
+│   └── vitest.config.*.ts       # Unit and integration suites (shared base in vitest.shared.ts)
 ├── .github/workflows/lint.yml   # CI: lint and test jobs per stack
 ├── docker-compose.yml
 ├── Makefile
@@ -207,9 +209,15 @@ apps/tasks/
   `ALLOWED_HOSTS`, the Celery jobs, the admin's query counts and the settings of
   each environment.
 - **Frontend:** `make frontend-test`. Uses Vitest with Testing Library and fails
-  under 80% coverage (currently ~98%). Covers components, pages, hooks and the
-  pure helpers. Any `console.warn` or `console.error` during a test fails it,
-  to keep the browser console clean.
+  under 80% coverage (currently ~98%). Tests sit in a `__tests__/` folder next
+  to the code and come in two suites, which can also run on their own:
+  - **Unit** (`*.unit.spec.ts`, `make frontend-test-unit`): pure helpers,
+    hooks and API modules.
+  - **Integration** (`*.integration.spec.tsx`, `make frontend-test-integration`):
+    components and pages rendered with the theme, router and auth providers.
+
+  Any `console.warn` or `console.error` during a test fails it, to keep the
+  browser console clean.
 - **CI** (`.github/workflows/lint.yml`) runs on every push and pull request with
   four jobs: `backend-lint` (black, flake8 and isort as separate steps),
   `backend-test` (migration check and pytest against a PostgreSQL service),
