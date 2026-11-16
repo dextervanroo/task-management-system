@@ -266,6 +266,16 @@ files = [
 django = ">=5.2"
 
 [[package]]
+name = "djangorestframework-camel-case"
+version = "1.4.2"
+description = "Camel case JSON support for Django REST framework."
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "djangorestframework-camel-case-1.4.2.tar.gz", hash = "sha256:cdae75846648abb6585c7470639a1d2fb064dc45f8e8b62aaa50be7f1a7a61f4"},
+]
+
+[[package]]
 name = "factory-boy"
 version = "3.3.3"
 description = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
@@ -738,4 +748,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12"
-content-hash = "ad3027664e71194e20024897c6e4a2f7d4fe21425e062a2a837572f6ba4a74d6"
+content-hash = "3c02c2472662f4d68901f93b6d385b759553a13c7d9bb93913d604aa8d50aae5"
