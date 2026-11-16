@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router";
 
 import { renderWithProviders } from "@/test/render";
 
-import { AppLayout } from "./AppLayout";
+import { AppLayout } from "../AppLayout";
 
 describe("AppLayout", () => {
   function renderLayout() {

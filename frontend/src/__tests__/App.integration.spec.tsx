@@ -5,7 +5,7 @@ import * as usersApi from "@/api/users";
 import { page } from "@/test/fixtures";
 import { makeAuth, renderWithProviders } from "@/test/render";
 
-import App from "./App";
+import App from "../App";
 
 beforeEach(() => {
   vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([]));

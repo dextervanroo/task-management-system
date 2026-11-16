@@ -8,7 +8,7 @@ import {
   statusColor,
   statusLabel,
   todayIso,
-} from "./taskFormat";
+} from "../taskFormat";
 
 const task = (overrides: Partial<Task>) => ({ status: "pending", dueDate: null, ...overrides }) as Task;
 

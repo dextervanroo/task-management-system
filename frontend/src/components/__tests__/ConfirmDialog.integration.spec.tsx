@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { renderWithProviders } from "@/test/render";
 
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 describe("ConfirmDialog", () => {
   function renderDialog(busy = false) {

@@ -1,7 +1,7 @@
-import { fetchCurrentUser, hasStoredSession, login, logout } from "./auth";
-import * as client from "./client";
-import { ApiError } from "./client";
-import { getAccessToken, getRefreshToken, setTokens } from "./tokenStorage";
+import { fetchCurrentUser, hasStoredSession, login, logout } from "../auth";
+import * as client from "../client";
+import { ApiError } from "../client";
+import { getAccessToken, getRefreshToken, setTokens } from "../tokenStorage";
 
 describe("auth api", () => {
   it("stores the tokens returned by login", async () => {

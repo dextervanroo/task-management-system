@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react";
 import { bob, makeTask } from "@/test/fixtures";
 import { renderWithProviders } from "@/test/render";
 
-import { TaskCard } from "./TaskCard";
+import { TaskCard } from "../TaskCard";
 
 const today = "2026-11-16";
 

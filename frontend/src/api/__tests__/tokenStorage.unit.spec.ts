@@ -4,7 +4,7 @@ import {
   getRefreshToken,
   REFRESH_TOKEN_KEY,
   setTokens,
-} from "./tokenStorage";
+} from "../tokenStorage";
 
 describe("tokenStorage", () => {
   afterEach(() => clearTokens());

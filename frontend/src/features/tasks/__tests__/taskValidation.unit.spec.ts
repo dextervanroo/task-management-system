@@ -6,7 +6,7 @@ import {
   toTaskInput,
   validateTaskForm,
   type TaskFormValues,
-} from "./taskValidation";
+} from "../taskValidation";
 
 const today = "2026-11-16";
 const values = (overrides: Partial<TaskFormValues> = {}): TaskFormValues => ({

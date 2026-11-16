@@ -1,9 +1,9 @@
 import type { MockInstance } from "vitest";
 
-import * as client from "./client";
-import { completeTask, createTask, deleteTask, listTasks, updateTask } from "./tasks";
-import type { TaskInput } from "./types";
-import { listUsers } from "./users";
+import * as client from "../client";
+import { completeTask, createTask, deleteTask, listTasks, updateTask } from "../tasks";
+import type { TaskInput } from "../types";
+import { listUsers } from "../users";
 
 const input: TaskInput = {
   title: "Write docs",

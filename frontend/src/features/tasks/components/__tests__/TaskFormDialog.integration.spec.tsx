@@ -6,7 +6,7 @@ import * as tasksApi from "@/api/tasks";
 import { bob, makeTask } from "@/test/fixtures";
 import { alice, renderWithProviders } from "@/test/render";
 
-import { TaskFormDialog } from "./TaskFormDialog";
+import { TaskFormDialog } from "../TaskFormDialog";
 
 const users = [alice, bob];
 

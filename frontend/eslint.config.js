@@ -25,7 +25,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["src/**/*.test.{ts,tsx}", "src/test/**"],
+    files: ["src/**/__tests__/**", "src/test/**"],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: { "react-refresh/only-export-components": "off" },
   },

@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 
 import { renderWithProviders } from "@/test/render";
 
-import { DEFAULT_FILTERS, type TaskFilters } from "../taskFilters";
-import { TaskFiltersBar } from "./TaskFiltersBar";
+import { DEFAULT_FILTERS, type TaskFilters } from "../../taskFilters";
+import { TaskFiltersBar } from "../TaskFiltersBar";
 
 function renderBar(filters: TaskFilters = { ...DEFAULT_FILTERS, page: 3 }) {
   const onChange = vi.fn();

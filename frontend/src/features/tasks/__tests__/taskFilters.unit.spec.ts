@@ -5,7 +5,7 @@ import {
   filtersToQuery,
   filtersToSearchParams,
   hasActiveFilters,
-} from "./taskFilters";
+} from "../taskFilters";
 
 describe("filtersToQuery", () => {
   it("maps filters to the API's snake_case query parameters", () => {

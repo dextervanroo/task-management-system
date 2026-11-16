@@ -5,7 +5,7 @@ import { Route, Routes } from "react-router";
 import { ApiError } from "@/api/client";
 import { makeAuth, renderWithProviders } from "@/test/render";
 
-import LoginPage from "./LoginPage";
+import LoginPage from "../LoginPage";
 
 function renderLogin(auth = makeAuth({ status: "anonymous", user: null })) {
   return renderWithProviders(

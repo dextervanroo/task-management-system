@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router";
 
 import { makeAuth, renderWithProviders } from "@/test/render";
 
-import { RequireAuth } from "./RequireAuth";
+import { RequireAuth } from "../RequireAuth";
 
 function renderGuard(status: "loading" | "authenticated" | "anonymous") {
   return renderWithProviders(

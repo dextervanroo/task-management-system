@@ -4,9 +4,9 @@ import * as tasksApi from "@/api/tasks";
 import * as usersApi from "@/api/users";
 import { bob, makeTask, page } from "@/test/fixtures";
 
-import { DEFAULT_FILTERS } from "../taskFilters";
-import { PAGE_SIZE, useTasks } from "./useTasks";
-import { useUsers } from "./useUsers";
+import { DEFAULT_FILTERS } from "../../taskFilters";
+import { PAGE_SIZE, useTasks } from "../useTasks";
+import { useUsers } from "../useUsers";
 
 describe("useTasks", () => {
   it("loads tasks for the filters", async () => {

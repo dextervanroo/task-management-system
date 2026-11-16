@@ -10,7 +10,7 @@ FRONTEND = docker compose exec frontend
 .PHONY: help setup use-development use-production up down rebuild ps logs backend-logs \
 	frontend-logs celery-logs migrate makemigrations seed createsuperuser shell benchmark-indexes backend-lint \
 	backend-format backend-test backend-test-cov frontend-install frontend-lint frontend-test \
-	frontend-test-cov lint test clean
+	frontend-test-unit frontend-test-integration frontend-test-cov lint test clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -107,8 +107,14 @@ frontend-lint: ## Run ESLint and the TypeScript compiler
 	$(FRONTEND) npm run lint
 	$(FRONTEND) npx tsc -b
 
-frontend-test: ## Run Vitest
+frontend-test: ## Run every Vitest suite (unit and integration)
 	$(FRONTEND) npm run test
+
+frontend-test-unit: ## Run the unit specs (helpers, hooks, API modules)
+	$(FRONTEND) npm run test:unit
+
+frontend-test-integration: ## Run the integration specs (components and pages)
+	$(FRONTEND) npm run test:integration
 
 frontend-test-cov: ## Run Vitest with coverage (report in frontend/coverage)
 	$(FRONTEND) npm run test:coverage

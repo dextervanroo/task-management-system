@@ -1,7 +1,7 @@
 import { bob, makeTask } from "@/test/fixtures";
 import { alice } from "@/test/render";
 
-import { canDeleteTask } from "./permissions";
+import { canDeleteTask } from "../permissions";
 
 describe("canDeleteTask", () => {
   it("allows the creator", () => {

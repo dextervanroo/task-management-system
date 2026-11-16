@@ -5,8 +5,8 @@ import * as authApi from "@/api/auth";
 import * as client from "@/api/client";
 import { alice } from "@/test/render";
 
-import { AuthProvider } from "./AuthProvider";
-import { useAuth } from "./useAuth";
+import { AuthProvider } from "../AuthProvider";
+import { useAuth } from "../useAuth";
 
 function Probe() {
   const { status, user, login, logout } = useAuth();

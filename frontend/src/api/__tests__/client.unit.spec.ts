@@ -1,5 +1,5 @@
-import { ApiError, apiRequest, buildUrl, onUnauthorized } from "./client";
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "./tokenStorage";
+import { ApiError, apiRequest, buildUrl, onUnauthorized } from "../client";
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "../tokenStorage";
 
 const API = "http://localhost:8000/api";
 

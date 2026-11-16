@@ -7,7 +7,7 @@ import * as usersApi from "@/api/users";
 import { bob, makeTask, page } from "@/test/fixtures";
 import { renderWithProviders } from "@/test/render";
 
-import TasksPage from "./TasksPage";
+import TasksPage from "../TasksPage";
 
 function LocationProbe() {
   return <p data-testid="location">{useLocation().search}</p>;
