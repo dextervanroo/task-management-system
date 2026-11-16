@@ -164,6 +164,40 @@ describe("apiRequest", () => {
     unsubscribe();
   });
 
+  it("restores the session before the first request instead of failing with 401", async () => {
+    localStorage.setItem("tms.refreshToken", "stored-refresh");
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(200, { access: "fresh", refresh: "refresh-2" }))
+      .mockResolvedValueOnce(jsonResponse(200, { username: "alice" }));
+
+    await expect(apiRequest("/users/me/")).resolves.toEqual({ username: "alice" });
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      `${API}/auth/refresh/`,
+      `${API}/users/me/`,
+    ]);
+    expect(new Headers(fetchMock.mock.calls[1][1]?.headers).get("Authorization")).toBe(
+      "Bearer fresh",
+    );
+  });
+
+  it("ends the session when the stored refresh token is no longer valid", async () => {
+    localStorage.setItem("tms.refreshToken", "revoked");
+    const listener = vi.fn();
+    const unsubscribe = onUnauthorized(listener);
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Token is blacklisted" }))
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "No credentials" }));
+
+    const error = await failure(apiRequest("/users/me/"));
+
+    expect(error.status).toBe(401);
+    expect(getRefreshToken()).toBeNull();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    unsubscribe();
+  });
+
   it("does not try to refresh without a refresh token", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(401, { detail: "No credentials" }));
 

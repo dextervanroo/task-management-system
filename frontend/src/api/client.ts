@@ -112,16 +112,27 @@ function refreshTokens(): Promise<boolean> {
   return refreshInFlight;
 }
 
+function endSession(): void {
+  clearTokens();
+  unauthorizedListeners.forEach((listener) => listener());
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const auth = options.auth ?? true;
+
+  // After a page reload only the refresh token survives: get a new access token
+  // first instead of sending a request that is bound to fail with 401.
+  if (auth && !getAccessToken() && getRefreshToken() && !(await refreshTokens())) {
+    endSession();
+  }
+
   let response = await send(path, options, auth ? getAccessToken() : null);
 
   if (response.status === 401 && auth && getRefreshToken()) {
     if (await refreshTokens()) {
       response = await send(path, options, getAccessToken());
     } else {
-      clearTokens();
-      unauthorizedListeners.forEach((listener) => listener());
+      endSession();
     }
   }
 
