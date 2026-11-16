@@ -109,5 +109,7 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ],
+    "DEFAULT_PAGINATION_CLASS": "apps.core.api.pagination.StandardPagination",
+    "PAGE_SIZE": 10,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
