@@ -19,6 +19,9 @@ interface Props {
 
 const SEARCH_DELAY_MS = 300;
 
+/** Show the "all" option's text instead of an empty box when nothing is selected. */
+const EMPTY_OPTION_VISIBLE = { select: { displayEmpty: true }, inputLabel: { shrink: true } };
+
 export function TaskFiltersBar({ filters, onChange }: Props) {
   const [search, setSearch] = useState(filters.search);
   const rangeError = dateRangeError(filters);
@@ -80,6 +83,7 @@ export function TaskFiltersBar({ filters, onChange }: Props) {
       <TextField
         select
         label="Status"
+        slotProps={EMPTY_OPTION_VISIBLE}
         value={filters.status}
         onChange={(event) => update({ status: event.target.value as TaskFilters["status"] })}
       >
@@ -93,6 +97,7 @@ export function TaskFiltersBar({ filters, onChange }: Props) {
       <TextField
         select
         label="Overdue"
+        slotProps={EMPTY_OPTION_VISIBLE}
         value={filters.overdue}
         onChange={(event) => update({ overdue: event.target.value as TaskFilters["overdue"] })}
       >

@@ -141,7 +141,12 @@ export function TaskFormDialog({ task, users, onClose, onSaved }: Props) {
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
             />
-            <TextField {...field("assignee")} select label="Assignee">
+            <TextField
+              {...field("assignee")}
+              select
+              label="Assignee"
+              slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+            >
               <MenuItem value="">Unassigned</MenuItem>
               {users.map((user) => (
                 <MenuItem key={user.id} value={user.id}>

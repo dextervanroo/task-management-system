@@ -91,6 +91,13 @@ describe("TaskFiltersBar", () => {
     expect(screen.getByLabelText(/search/i)).toHaveValue("");
   });
 
+  it("shows the catch-all choices when nothing is selected", () => {
+    renderBar();
+
+    expect(screen.getByRole("combobox", { name: /status/i })).toHaveTextContent("All statuses");
+    expect(screen.getByRole("combobox", { name: /overdue/i })).toHaveTextContent("Any");
+  });
+
   it("hides the clear button without active filters", () => {
     renderBar();
 

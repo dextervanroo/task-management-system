@@ -30,6 +30,7 @@ describe("TaskFormDialog", () => {
     const create = vi.spyOn(tasksApi, "createTask").mockResolvedValue(created);
     const { onSaved } = renderDialog();
     expect(screen.getByRole("dialog", { name: "New task" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /assignee/i })).toHaveTextContent("Unassigned");
 
     await userEvent.type(screen.getByLabelText(/title/i), "  Write docs ");
     await userEvent.type(screen.getByLabelText(/description/i), "Setup guide");
