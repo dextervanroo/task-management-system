@@ -1,0 +1,90 @@
+# Local stack: PostgreSQL, Redis, Django API, Celery worker, Celery Beat and the
+# React frontend. Every service reads the root .env file; DJANGO_ENV picks the
+# settings module and the image targets (development | production).
+# Run `make up` or `docker compose up -d --build`.
+
+x-backend: &backend
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    target: ${DJANGO_ENV:-development}
+  env_file: .env
+  volumes:
+    - ./backend:/app
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    <<: *backend
+    ports:
+      - "8000:8000"
+    # Allows attaching to the container to use a debugger (pdb/breakpoint()).
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  celery-worker:
+    <<: *backend
+    command: celery -A config worker --loglevel=info
+    environment:
+      RUN_MIGRATIONS: "false"
+
+  celery-beat:
+    <<: *backend
+    command: celery -A config beat --loglevel=info --schedule /tmp/celerybeat-schedule
+    environment:
+      RUN_MIGRATIONS: "false"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${DJANGO_ENV:-development}
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    env_file: .env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      # Keep the container's node_modules instead of the host's.
+      - frontend_deps:/app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  frontend_deps:
