@@ -97,3 +97,49 @@ describe("TasksPage", () => {
     await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
   });
 });
+
+describe("TasksPage editing", () => {
+  it("creates a task and reloads the list", async () => {
+    const list = vi
+      .spyOn(tasksApi, "listTasks")
+      .mockResolvedValueOnce(page([]))
+      .mockResolvedValueOnce(page([makeTask({ title: "Fresh task" })]));
+    vi.spyOn(tasksApi, "createTask").mockResolvedValue(makeTask({ title: "Fresh task" }));
+    renderPage();
+    await screen.findByText("No tasks yet.");
+
+    await userEvent.click(screen.getByRole("button", { name: "New task" }));
+    await userEvent.type(screen.getByLabelText(/title/i), "Fresh task");
+    await userEvent.click(screen.getByRole("button", { name: "Create task" }));
+
+    expect(await screen.findByText("Task created.")).toBeInTheDocument();
+    expect(await screen.findByRole("article", { name: "Fresh task" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(list).toHaveBeenCalledTimes(2);
+  });
+
+  it("edits a task from its card", async () => {
+    const task = makeTask({ title: "Draft" });
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([task]));
+    const update = vi.spyOn(tasksApi, "updateTask").mockResolvedValue({ ...task, title: "Final" });
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Edit Draft" }));
+    await userEvent.clear(screen.getByLabelText(/title/i));
+    await userEvent.type(screen.getByLabelText(/title/i), "Final");
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(update).toHaveBeenCalledWith(task.id, expect.objectContaining({ title: "Final" }));
+    expect(await screen.findByText("Task updated.")).toBeInTheDocument();
+  });
+
+  it("closes the form without saving", async () => {
+    vi.spyOn(tasksApi, "listTasks").mockResolvedValue(page([]));
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "New task" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+});
