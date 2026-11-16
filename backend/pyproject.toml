@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "task-management-backend"
+version = "0.1.0"
+description = "REST API for a task management system built with Django REST Framework."
+authors = ["dextervanroo"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "~3.12"
+django = "~5.2"
+djangorestframework = "^3.16"
+django-environ = "^0.14"
+psycopg = {version = "^3.2", extras = ["binary"]}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.2"
+pytest-django = "^4.14"
+pytest-cov = "^7.1"
+factory-boy = "^3.3"
+black = "^26.10"
+isort = "^9.0"
+flake8 = "^7.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = '''
+/(
+    \.venv
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip = [".venv", "migrations"]
+known_first_party = ["apps", "config"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "--strict-markers --cov=apps --cov=config --cov-report=term-missing:skip-covered --cov-fail-under=80"
+filterwarnings = ["error::RuntimeWarning"]
+
+[tool.coverage.run]
+branch = true
+omit = ["*/migrations/*", "*/tests/*", "config/asgi.py", "config/wsgi.py"]
